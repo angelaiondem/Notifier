@@ -1,7 +1,27 @@
-class ConfigRepo:
+import os
+from typing import Optional
+from dotenv import load_dotenv
+from os.path import join
+from pathlib import Path
 
-    def __init__(self, dot_env_path: str):  # TODO to parse the .env file and create env variables using pydotenv lib.
-        pass
+import src.core.repositories as scr
+import src.config as c
+from src.core.entities import EnvItemEntity
 
-    def get_one(self):
-        pass
+
+class ConfigRepo(scr.BaseRepository):
+    _DOTENV_PATH = join(Path(__file__).parent.parent.parent, '.env')
+
+    def __init__(self, dot_env_path: str = _DOTENV_PATH):
+        self.dot_env_path = dot_env_path
+        load_dotenv(self.dot_env_path)
+
+    def get_one(self, key: str) -> EnvItemEntity:
+        env_value = os.environ.get(key)
+        env_item_entity = EnvItemEntity(key=key, value=env_value)
+        return env_item_entity
+
+
+config = ConfigRepo()
+
+print(m.get_one(c.SMTP_PORT))

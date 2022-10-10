@@ -2,30 +2,44 @@ import abc
 
 
 class BaseMessengerServiceProvider(abc.ABC):
+
     @abc.abstractmethod
-    def send_message(self, msg_address: str, body: str) -> None:
-        pass
+    def send_message(self, ) -> None:
+        """Abstract method is implemented in the inherited class."""
 
 
 class BaseEmailServiceProvider(abc.ABC):
     @abc.abstractmethod
-    def send_email(self, email_address: str, body: str) -> None:
-        pass
+    def send_email(
+            self,
+            email_address: str,
+            email_subject: str,
+            body: str
+    ) -> None:
+        """
+        Abstract method is implemented in the inherited class.
+
+        :param email_address:
+        :param email_subject:
+        :param body:
+        :return: None
+        """
 
 
 class BaseLoggerProvider(abc.ABC):
-    @abc.abstractmethod
-    def info(self, msg: str) -> None:
-        pass
 
     @abc.abstractmethod
-    def warning(self, msg: str) -> None:
-        pass
+    def info(self, message: str) -> None:
+        """ Is implemented in the infrastructure layer."""
 
     @abc.abstractmethod
-    def error(self, msg: str) -> None:
-        pass
+    def warning(self, message: str) -> None:
+        """ Is implemented in the infrastructure layer."""
 
     @abc.abstractmethod
-    def critical(self, msg: str) -> None:
-        pass
+    def error(self, message: str) -> None:
+        """ Is implemented in the infrastructure layer."""
+
+    @abc.abstractmethod
+    def critical(self, message: str) -> None:
+        """ Is implemented in the infrastructure layer."""

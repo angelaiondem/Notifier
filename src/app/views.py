@@ -1,10 +1,26 @@
+import json
+
 import requests
-from flask import views
+from flask import Flask, request
+from flask.views import MethodView
+
+from src.infrastructure.controllers import APIController
 
 
-class APIView(views.MethodView):
+class APIView(MethodView):
 
     def post(self):
-        # TODO Implement the post  method which will create an instance of the APIController and
-        #  pass the request.json to it's process_event  method.
-        pass
+        data = request.json
+        api_controller = APIController()
+        print(data)
+        return data
+
+
+def main():
+    app = Flask(__name__)
+    app.add_url_rule("/", view_func=APIView.as_view("/"))
+    app.run()
+
+
+if __name__ == "__main__":
+    main()

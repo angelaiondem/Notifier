@@ -10,7 +10,8 @@ class BaseUseCase(abc.ABC):
 
 class NotifierUseCase(BaseUseCase):
 
-    def __init__(self):
+    def __init__(self, get_parameters):
+
         pass
 
     def execute(self):

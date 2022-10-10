@@ -1,0 +1,22 @@
+[
+  {
+    "event_type": "approved_publication",
+    "body": "{}",
+    "to": "None"
+  },
+  {
+    "event_type": "new_publication",
+    "body": "If you can change the data format, then you can substitute an array of strings.",
+    "to": "angelaiondem@yahoo.com"
+  },
+  {
+    "event_type": "new_publication",
+    "body": "A new news product and partnerships with some of the most respected local, regional and national publications.",
+    "to": "angelaiondem@yahoo.com"
+  },
+  {
+    "event_type": "new_publication",
+    "body": "Google is helping you make sense of the world by making it easier to find diverse perspectives when you search.",
+    "to": "angelaiondem@yahoo.com"
+  }
+]
