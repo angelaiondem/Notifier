@@ -1,5 +1,5 @@
 import smtplib
-
+import slack
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -31,13 +31,18 @@ class EmailService:
         s.starttls()
         s.login(self.email_username, self.email_app_pass)
         msg_text = msg.as_string()
-        send_errs = s.sendmail(self.from_email, to_email, msg_text)
-        print(send_errs)
+        s.sendmail(from_addr=self.from_email, to_addrs=to_email, msg=msg_text)
         s.quit()
 
 
 class SlackService:
-    pass
+
+    def __init__(self, slack_token: str):
+        self.__slack_token = slack_token
+        self.__client = slack.WebClient(token=self.__slack_token)
+
+    def send_message(self, channel: str, body: str):
+        self.__client.chat_postMessage(channel=channel, text=body)
 
 
 class LoggerService:

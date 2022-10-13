@@ -5,7 +5,7 @@ class EventSerializer:
 
     def serialize(self, event_entity: EventEntity) -> dict:
         event_entity_dict = {
-            "event_type": event_entity.event_type.value,
+            "event_type": event_entity.event_type,
             "body": event_entity.body,
             "to": event_entity.to
 

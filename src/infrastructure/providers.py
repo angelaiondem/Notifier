@@ -7,14 +7,19 @@ from src import config
 
 class SlackMessengerProvider(sci.BaseMessengerServiceProvider):
 
-    def __init__(self):
-        pass
+    def __init__(
+            self,
+            logger_provider: sci.BaseLoggerProvider,
+            slack_service: sis.SlackService
+    ):
+        self._logger_provider = logger_provider
+        self._slack_service = slack_service
 
-    def send_message(self) -> None:
+    def send_message(self,  channel: str, body: str) -> None:
         """
-
-        :return:
+        Post a message(body) to a given channel.
         """
+        self._slack_service.send_message(channel=channel, body=body)
 
 
 class EmailServiceProvider(sci.BaseEmailServiceProvider):

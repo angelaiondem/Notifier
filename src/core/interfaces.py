@@ -1,14 +1,14 @@
 import abc
 
 
-class BaseMessengerServiceProvider(abc.ABC):
+class BaseMessengerServiceProvider(metaclass=abc.ABC):
 
     @abc.abstractmethod
-    def send_message(self, ) -> None:
+    def send_message(self, channel: str, body: dict) -> None:
         """Abstract method is implemented in the inherited class."""
 
 
-class BaseEmailServiceProvider(abc.ABC):
+class BaseEmailServiceProvider(metaclass=abc.ABC):
     @abc.abstractmethod
     def send_email(
             self,
@@ -18,15 +18,10 @@ class BaseEmailServiceProvider(abc.ABC):
     ) -> None:
         """
         Abstract method is implemented in the inherited class.
-
-        :param email_address:
-        :param email_subject:
-        :param body:
-        :return: None
         """
 
 
-class BaseLoggerProvider(abc.ABC):
+class BaseLoggerProvider(metaclass=abc.ABC):
 
     @abc.abstractmethod
     def info(self, message: str) -> None:

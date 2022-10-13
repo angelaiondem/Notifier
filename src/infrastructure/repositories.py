@@ -20,8 +20,3 @@ class ConfigRepo(scr.BaseRepository):
         env_value = os.environ.get(key)
         env_item_entity = EnvItemEntity(key=key, value=env_value)
         return env_item_entity
-
-
-config = ConfigRepo()
-
-print(m.get_one(c.SMTP_PORT))

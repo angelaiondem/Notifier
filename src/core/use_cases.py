@@ -1,7 +1,7 @@
 import abc
 
 
-class BaseUseCase(abc.ABC):
+class BaseUseCase(metaclass=abc.ABC):
 
     @abc.abstractmethod
     def execute(self):

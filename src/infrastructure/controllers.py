@@ -1,24 +1,31 @@
 import abc
 import json
 
-import requests
-
 import src.config as conf
-from src.infrastructure.providers import EmailServiceProvider, LoggerProvider
+
+from src.infrastructure.providers import EmailServiceProvider, LoggerProvider, \
+    SlackMessengerProvider
 from src.infrastructure.repositories import ConfigRepo
-from src.infrastructure.services import EmailService, LoggerService
+from src.infrastructure.serializers import EventSerializer
+from src.infrastructure.services import EmailService, LoggerService, \
+    SlackService
 
 
-class BaseController(abc.ABC):
+class BaseController(metaclass=abc.ABC):
+    _slack_service: SlackService
     _email_service: EmailService
     _logg_service: LoggerService
     _env_repo: ConfigRepo
+    _messenger_service_provider: SlackMessengerProvider
     _email_provider: EmailServiceProvider
     _logger_service_provider: LoggerProvider
 
-
     def slack_service(self):
-        pass
+        if self._slack_service is None:
+            self._slack_service = SlackService(
+                slack_token=self._env_repo.get_one(conf.SLACK_TOKEN).value,
+            )
+        return self._slack_service
 
     @property
     def email_service(self) -> EmailService:
@@ -67,7 +74,12 @@ class BaseController(abc.ABC):
 
     @property
     def messenger_service_provider(self):
-        pass
+        if self._messenger_service_provider is None:
+            self._messenger_service_provider = SlackMessengerProvider(
+                self.logger_service_provider,
+                self.slack_service
+            )
+        return self._messenger_service_provider
 
     @property
     def logger_service_provider(self):
@@ -78,6 +90,9 @@ class BaseController(abc.ABC):
 
 class APIController(BaseController):
 
-    def process_event(self, event: json):
-        if event["event_type"] == "new_publication":
-            send_message = B
+    def process_event(self, event: dict):
+
+        if event_item_entity.event_type == "new_publication":
+            self.messenger_service_provider(event_item_entity)
+        elif event_item_entity.event_type == "approved_publication":
+            self.email_service_provider(event_item_entity)

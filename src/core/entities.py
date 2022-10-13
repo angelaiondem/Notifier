@@ -9,6 +9,13 @@ class EnvItemEntity:
     value: str
 
 
+@dataclass
+class EventEntity:
+    event_type: str
+    body: str
+    to: Optional[str] = None
+
+"""
 class EventTypeEnum(Enum):
     NEW_PUBLICATION = "new_publication"
     APPROVED_PUBLICATION = "approved_publication"
@@ -19,3 +26,4 @@ class EventEntity:
     event_type: EventTypeEnum
     body: str
     to: Optional[str] = None
+"""

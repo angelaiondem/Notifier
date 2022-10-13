@@ -1,7 +1,7 @@
 import abc
 
 
-class BaseRepository(abc.ABC):
+class BaseRepository(metaclass=abc.ABC):
 
     @abc.abstractmethod
     def get_one(self, key: str) -> str:

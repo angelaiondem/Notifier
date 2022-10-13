@@ -11,7 +11,7 @@ class APIView(MethodView):
 
     def post(self):
         data = request.json
-        api_controller = APIController()
+        api_controller = APIController(dict(data))
         print(data)
         return data
 
