@@ -1,7 +1,4 @@
-import json
-
-import requests
-from flask import Flask, request
+from flask import request
 from flask.views import MethodView
 
 from src.infrastructure.controllers import APIController
@@ -9,18 +6,11 @@ from src.infrastructure.controllers import APIController
 
 class APIView(MethodView):
 
-    def post(self):
-        data = request.json
-        api_controller = APIController(dict(data))
-        print(data)
-        return data
+    @staticmethod
+    def post():
+        request_data = request.json
+        print(type(request_data))
 
-
-def main():
-    app = Flask(__name__)
-    app.add_url_rule("/", view_func=APIView.as_view("/"))
-    app.run()
-
-
-if __name__ == "__main__":
-    main()
+        api_controller = APIController()
+        api_controller.process_event(request_data)
+        return request_data

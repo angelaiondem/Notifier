@@ -1,27 +1,25 @@
 import abc
 
+from src.core.entities import EventEntity
 
-class BaseMessengerServiceProvider(metaclass=abc.ABC):
+
+class BaseMessengerServiceProvider(abc.ABC):
 
     @abc.abstractmethod
-    def send_message(self, channel: str, body: dict) -> None:
+    def send_message(self, event_entity: dict) -> None:
         """Abstract method is implemented in the inherited class."""
 
 
-class BaseEmailServiceProvider(metaclass=abc.ABC):
+class BaseEmailServiceProvider(abc.ABC):
+
     @abc.abstractmethod
-    def send_email(
-            self,
-            email_address: str,
-            email_subject: str,
-            body: str
-    ) -> None:
+    def send_email(self, event_entity: EventEntity) -> None:
         """
         Abstract method is implemented in the inherited class.
         """
 
 
-class BaseLoggerProvider(metaclass=abc.ABC):
+class BaseLoggerProvider(abc.ABC):
 
     @abc.abstractmethod
     def info(self, message: str) -> None:

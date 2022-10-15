@@ -1,9 +1,10 @@
-from src.core.entities import EventEntity, EventTypeEnum
+from src.core.entities import EventEntity
 
 
 class EventSerializer:
 
-    def serialize(self, event_entity: EventEntity) -> dict:
+    @staticmethod
+    def serialize(event_entity: EventEntity) -> dict:
         event_entity_dict = {
             "event_type": event_entity.event_type,
             "body": event_entity.body,
@@ -12,9 +13,10 @@ class EventSerializer:
         }
         return event_entity_dict
 
-    def deserialize(self, event_entity_dict: dict) -> EventEntity:
+    @staticmethod
+    def deserialize(event_entity_dict: dict) -> EventEntity:
         event_entity = EventEntity(
-            event_type=EventTypeEnum(event_entity_dict.get("event_type")),
+            event_type=event_entity_dict.get("event_type"),
             body=event_entity_dict.get("body"),
             to=event_entity_dict.get("to")
         )

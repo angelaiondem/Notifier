@@ -1,57 +1,54 @@
 import logging
 
-import src.core.interfaces as sci
-import src.infrastructure.services as sis
-from src import config
+from src.core.interfaces import BaseMessengerServiceProvider, \
+    BaseLoggerProvider, BaseEmailServiceProvider
+from src.infrastructure.services import SlackService, LoggerService, \
+    EmailService
+from src.core.entities import EventEntity
 
 
-class SlackMessengerProvider(sci.BaseMessengerServiceProvider):
+class SlackMessengerProvider(BaseMessengerServiceProvider):
 
     def __init__(
             self,
-            logger_provider: sci.BaseLoggerProvider,
-            slack_service: sis.SlackService
+            logger_provider: BaseLoggerProvider,
+            slack_service: SlackService
     ):
         self._logger_provider = logger_provider
         self._slack_service = slack_service
 
-    def send_message(self,  channel: str, body: str) -> None:
+    def send_message(self, event_entity: dict) -> None:
         """
-        Post a message(body) to a given channel.
+        Post a message(body) to a given slack channel.
         """
-        self._slack_service.send_message(channel=channel, body=body)
+        self._slack_service.send_message(event_entity=event_entity)
 
 
-class EmailServiceProvider(sci.BaseEmailServiceProvider):
+class EmailServiceProvider(BaseEmailServiceProvider):
 
     def __init__(
             self,
-            logger_provider: sci.BaseLoggerProvider,
-            email_service: sis.EmailService
+            logger_provider: BaseLoggerProvider,
+            email_service: EmailService
     ):
         self._logger_provider = logger_provider
         self._email_service = email_service
 
-    def send_email(
-            self,
-            email_address: str,
-            email_subject: str,
-            body: str
-    ) -> None:
-        self._email_service.send_email(email_address, email_subject, body)
+    def send_email(self, event_entity: EventEntity) -> None:
+        self._email_service.send_email(event_entity)
 
 
-class LoggerProvider(sci.BaseLoggerProvider):
+class LoggerProvider(BaseLoggerProvider):
 
-    def __init__(self, logger_service: sis.LoggerService):
-        self.logger_service = logger_service
+    def __init__(self, logger_service: LoggerService):
+        self._logger_service = logger_service
 
     @property
     def logger(self):
-        logger = logging.Logger(name=self.logger_name)
-        logger.setLevel(self.log_level)
-        file_handler = logging.FileHandler(self.log_file_path)
-        formatter = logging.Formatter(self.log_format)
+        logger = logging.Logger(name=self._logger_service.logger_name)
+        logger.setLevel(self._logger_service.log_level)
+        file_handler = logging.FileHandler(self._logger_service.log_file_path)
+        formatter = logging.Formatter(self._logger_service.log_format)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
         return logger

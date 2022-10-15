@@ -13,6 +13,7 @@ SMTP_PORT = "SMTP_PORT"
 EMAIL_USERNAME = "EMAIL_USERNAME"
 EMAIL_APP_PASS = "EMAIL_APP_PASS"
 FROM_EMAIL = "FROM_EMAIL"
+EMAIL_SUBJECT = "Approved publication"
 
 
 # Slack configurations.

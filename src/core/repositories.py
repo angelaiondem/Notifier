@@ -1,11 +1,12 @@
 import abc
 
+from src.core.entities import EnvItemEntity
 
-class BaseRepository(metaclass=abc.ABC):
+
+class BaseRepository(abc.ABC):
 
     @abc.abstractmethod
-    def get_one(self, key: str) -> str:
+    def get_one(self, key: str) -> EnvItemEntity:
         """
-        By providing the key, the function gets and returns
-        the value of the entity under the mentioned key.
+        Get the key and return the key value pare of the environmental variable.
         """

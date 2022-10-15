@@ -1,8 +1,8 @@
 import abc
-import json
+from typing import Optional
 
-import src.config as conf
-
+from src import config
+from src.core.use_cases import NotifierUseCase
 from src.infrastructure.providers import EmailServiceProvider, LoggerProvider, \
     SlackMessengerProvider
 from src.infrastructure.repositories import ConfigRepo
@@ -11,19 +11,24 @@ from src.infrastructure.services import EmailService, LoggerService, \
     SlackService
 
 
-class BaseController(metaclass=abc.ABC):
-    _slack_service: SlackService
-    _email_service: EmailService
-    _logg_service: LoggerService
-    _env_repo: ConfigRepo
-    _messenger_service_provider: SlackMessengerProvider
-    _email_provider: EmailServiceProvider
-    _logger_service_provider: LoggerProvider
+class BaseController(abc.ABC):
 
-    def slack_service(self):
+    def __init__(self):
+        self._slack_service: Optional[SlackService] = None
+        self._email_service: Optional[EmailService] = None
+        self._logg_service: Optional[LoggerService] = None
+        self._env_repo: Optional[ConfigRepo] = None
+        self._messenger_service_provider: Optional[
+            SlackMessengerProvider] = None
+        self._email_provider: Optional[EmailServiceProvider] = None
+        self._logger_service_provider: Optional[LoggerProvider] = None
+
+    @property
+    def slack_service(self) -> SlackService:
         if self._slack_service is None:
             self._slack_service = SlackService(
-                slack_token=self._env_repo.get_one(conf.SLACK_TOKEN).value,
+                slack_token=self.env_repo.get_one(config.SLACK_TOKEN).value,
+                slack_channel=config.SLACK_CHANNEL
             )
         return self._slack_service
 
@@ -35,14 +40,14 @@ class BaseController(metaclass=abc.ABC):
         """
         if self._email_service is None:
             self._email_service = EmailService(
-                smtp_host=self._env_repo.get_one(conf.SMTP_HOST).value,
-                smtp_port=self._env_repo.get_one(conf.SMTP_PORT).value,
-                email_username=self._env_repo.get_one(
-                    conf.EMAIL_USERNAME).value,
-                email_app_pass=self._env_repo.get_one(
-                    conf.EMAIL_APP_PASS).value,
-                from_email=self._env_repo.get_one(conf.FROM_EMAIL).value
-
+                smtp_host=self.env_repo.get_one(config.SMTP_HOST).value,
+                smtp_port=self.env_repo.get_one(config.SMTP_PORT).value,
+                email_username=self.env_repo.get_one(
+                    config.EMAIL_USERNAME).value,
+                email_app_pass=self.env_repo.get_one(
+                    config.EMAIL_APP_PASS).value,
+                from_email=self.env_repo.get_one(config.FROM_EMAIL).value,
+                email_subject=config.EMAIL_SUBJECT
             )
         return self._email_service
 
@@ -50,10 +55,10 @@ class BaseController(metaclass=abc.ABC):
     def logger_service(self):
         if self._logg_service is None:
             self._logg_service = LoggerService(
-                logger_name=conf.LOGGER_NAME,
-                formatter=conf.DEFAULT_LOG_FORMAT,
-                log_file_path=conf.LOG_FILE_PATH,
-                log_level=conf.DEFAULT_LOG_LEVEL
+                logger_name=config.LOGGER_NAME,
+                formatter=config.DEFAULT_LOG_FORMAT,
+                log_file_path=config.LOG_FILE_PATH,
+                log_level=config.DEFAULT_LOG_LEVEL
             )
         return self._logg_service
 
@@ -73,11 +78,10 @@ class BaseController(metaclass=abc.ABC):
         return self._email_provider
 
     @property
-    def messenger_service_provider(self):
+    def messenger_service_provider(self) -> SlackMessengerProvider:
         if self._messenger_service_provider is None:
             self._messenger_service_provider = SlackMessengerProvider(
-                self.logger_service_provider,
-                self.slack_service
+                self.logger_service_provider, self.slack_service
             )
         return self._messenger_service_provider
 
@@ -90,9 +94,18 @@ class BaseController(metaclass=abc.ABC):
 
 class APIController(BaseController):
 
-    def process_event(self, event: dict):
-
-        if event_item_entity.event_type == "new_publication":
-            self.messenger_service_provider(event_item_entity)
-        elif event_item_entity.event_type == "approved_publication":
-            self.email_service_provider(event_item_entity)
+    def process_event(self, request_data: dict):
+        # TODO check validations.
+        event_entity = EventSerializer.deserialize(request_data)
+        if event_entity.event_type == "new_publication":
+            notifier_use_case = NotifierUseCase(
+                event_entity,
+                self.messenger_service_provider
+            )
+            notifier_use_case.execute()
+        elif event_entity.event_type == "approved_publication":
+            notifier_use_case = NotifierUseCase(
+                event_entity,
+                self.email_service_provider
+            )
+            notifier_use_case.execute()

@@ -1,11 +1,11 @@
 import os
-from typing import Optional
-from dotenv import load_dotenv
 from os.path import join
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
 import src.core.repositories as scr
-import src.config as c
 from src.core.entities import EnvItemEntity
 
 
