@@ -1,5 +1,7 @@
 import logging
 
+from src.core.exceptions import SlackMessageIsNotSentException, \
+    EmailIsNotSentException
 from src.core.interfaces import BaseMessengerServiceProvider, \
     BaseLoggerProvider, BaseEmailServiceProvider
 from src.infrastructure.services import SlackService, LoggerService, \
@@ -11,34 +13,50 @@ class SlackMessengerProvider(BaseMessengerServiceProvider):
 
     def __init__(
             self,
-            logger_provider: BaseLoggerProvider,
+            logger_service_provider: BaseLoggerProvider,
             slack_service: SlackService
     ):
-        self._logger_provider = logger_provider
+        self._logger_service_provider = logger_service_provider
         self._slack_service = slack_service
 
-    def send_message(self, event_entity: dict) -> None:
+    def send_message(self, event_entity: EventEntity) -> None:
         """
         Post a message(body) to a given slack channel.
         """
-        self._slack_service.send_message(event_entity=event_entity)
+        try:
+            self._slack_service.send_message(event_entity=event_entity)
+            self._logger_service_provider.info(
+                f"Message is sent to slack: {self._slack_service.slack_channel}"
+            )
+        except SlackMessageIsNotSentException as err:
+            self._logger_service_provider.error(
+                f"Couldn't send a message to slack {self._slack_service.slack_channel}: {err}"
+            )
 
 
 class EmailServiceProvider(BaseEmailServiceProvider):
 
     def __init__(
             self,
-            logger_provider: BaseLoggerProvider,
+            logger_service_provider: BaseLoggerProvider,
             email_service: EmailService
     ):
-        self._logger_provider = logger_provider
+        self._logger_service_provider = logger_service_provider
         self._email_service = email_service
 
     def send_email(self, event_entity: EventEntity) -> None:
-        self._email_service.send_email(event_entity)
+        try:
+            self._email_service.send_email(event_entity)
+            self._logger_service_provider.info(
+                f"Email is sent to\"{event_entity.to}\"."
+            )
+        except EmailIsNotSentException as err:
+            self._logger_service_provider.error(
+                f"Couldn't send an email to \"{event_entity.to}\" : {err}."
+            )
 
 
-class LoggerProvider(BaseLoggerProvider):
+class LoggerServiceProvider(BaseLoggerProvider):
 
     def __init__(self, logger_service: LoggerService):
         self._logger_service = logger_service

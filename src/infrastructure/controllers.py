@@ -1,9 +1,12 @@
 import abc
 from typing import Optional
 
+from email_validator import EmailNotValidError
+
 from src import config
+from src.core.exceptions import InvalidEventTypeException
 from src.core.use_cases import NotifierUseCase
-from src.infrastructure.providers import EmailServiceProvider, LoggerProvider, \
+from src.infrastructure.providers import EmailServiceProvider, LoggerServiceProvider, \
     SlackMessengerProvider
 from src.infrastructure.repositories import ConfigRepo
 from src.infrastructure.serializers import EventSerializer
@@ -21,7 +24,7 @@ class BaseController(abc.ABC):
         self._messenger_service_provider: Optional[
             SlackMessengerProvider] = None
         self._email_provider: Optional[EmailServiceProvider] = None
-        self._logger_service_provider: Optional[LoggerProvider] = None
+        self._logger_service_provider: Optional[LoggerServiceProvider] = None
 
     @property
     def slack_service(self) -> SlackService:
@@ -88,24 +91,41 @@ class BaseController(abc.ABC):
     @property
     def logger_service_provider(self):
         if self._logger_service_provider is None:
-            self._logger_service_provider = LoggerProvider(self.logger_service)
+            self._logger_service_provider = LoggerServiceProvider(
+                self.logger_service
+            )
         return self._logger_service_provider
 
 
 class APIController(BaseController):
 
-    def process_event(self, request_data: dict):
-        # TODO check validations.
-        event_entity = EventSerializer.deserialize(request_data)
-        if event_entity.event_type == "new_publication":
-            notifier_use_case = NotifierUseCase(
-                event_entity,
-                self.messenger_service_provider
-            )
-            notifier_use_case.execute()
-        elif event_entity.event_type == "approved_publication":
-            notifier_use_case = NotifierUseCase(
-                event_entity,
-                self.email_service_provider
-            )
-            notifier_use_case.execute()
+    def process_event(self, request_data: dict[str, str]):
+        try:
+            event_entity = EventSerializer.deserialize(request_data)
+            self.logger_service_provider.info("Request data is deserialized.")
+            if event_entity.event_type == config.NEW_PUBLICATION:
+                notifier_use_case = NotifierUseCase(
+                    event_entity,
+                    self.messenger_service_provider
+                )
+                notifier_use_case.execute()
+                self.logger_service_provider.info(
+                    f"Message is sent to slack channel: {config.SLACK_CHANNEL}"
+                )
+            elif event_entity.event_type == config.APPROVED_PUBLICATION:
+                notifier_use_case = NotifierUseCase(
+                    event_entity,
+                    self.email_service_provider
+                )
+                notifier_use_case.execute()
+                self.logger_service_provider.info(
+                    f"Email is sent to: {event_entity.to}"
+                )
+        except InvalidEventTypeException as err:
+            self.logger_service_provider.error(f"Event Type is invalid: {err}")
+        except EmailNotValidError as err:  # f"Email is not valid:  {to}"
+            self.logger_service_provider.error(f"Email is invalid: {err}")
+        except ValueError as err:  #
+            self.logger_service_provider.error(f"Slack body type error: {err}")
+        except Exception as err:
+            self.logger_service_provider.error(f"Process_event is failed:{err}")

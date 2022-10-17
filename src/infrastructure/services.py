@@ -6,6 +6,33 @@ import slack
 
 from src import config
 from src.core.entities import EventEntity
+from src.core.exceptions import EmailIsNotSentException, \
+    SlackMessageIsNotSentException
+
+
+class SlackService:
+
+    def __init__(
+            self,
+            slack_token: str,
+            slack_channel: str = config.SLACK_CHANNEL
+    ):
+        self.__client = slack.WebClient(token=slack_token)
+        self.slack_channel = slack_channel
+
+    def send_message(self, event_entity: EventEntity) -> None:
+        """
+        Post a given message/body to a given slack channel.
+        :event_entity body:
+        :return None:
+        """
+        try:
+            self.__client.chat_postMessage(
+                channel=self.slack_channel,
+                text=event_entity.body
+            )
+        except Exception as err:
+            raise SlackMessageIsNotSentException(err) from None
 
 
 class EmailService:
@@ -39,30 +66,8 @@ class EmailService:
                 smtp.login(self.email_username, self.email_app_pass)
                 msg_text = msg.as_string()
                 smtp.sendmail(self.from_email, event_entity.to, msg_text)
-        except Exception as e:
-            print(e)
-
-
-class SlackService:
-
-    def __init__(
-            self,
-            slack_token: str,
-            slack_channel: str = config.SLACK_CHANNEL
-    ):
-        self.__client = slack.WebClient(token=slack_token)
-        self.__slack_channel = slack_channel
-
-    def send_message(self, event_entity: dict) -> None:
-        """
-        Post a given message/body to a given slack channel.
-        :event_entity body:
-        :return None:
-        """
-        self.__client.chat_postMessage(
-            channel=self.__slack_channel,
-            text=event_entity["body"]
-        )
+        except Exception as err:
+            raise EmailIsNotSentException(err) from None
 
 
 class LoggerService:

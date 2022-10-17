@@ -2,9 +2,8 @@ import abc
 from typing import Union
 
 from src.core.entities import EventEntity
-from src.infrastructure.providers import SlackMessengerProvider, \
-    EmailServiceProvider
-from src.infrastructure.serializers import EventSerializer
+from src.core.interfaces import BaseMessengerServiceProvider, \
+    BaseEmailServiceProvider
 
 
 class BaseUseCase(abc.ABC):
@@ -20,18 +19,23 @@ class NotifierUseCase(BaseUseCase):
             self,
             event_entity: EventEntity,
             service_provider: Union[
-                SlackMessengerProvider, EmailServiceProvider]
+                BaseMessengerServiceProvider,
+                BaseEmailServiceProvider
+            ]
     ):
         self.event_entity = event_entity
-        self.event_entity_dict = EventSerializer.serialize(event_entity)
         self.service_provider = service_provider
 
-    def execute(self):
-        if isinstance(self.service_provider, SlackMessengerProvider):
+    def execute(self) -> None:
+        """
+        Run the data sending method of the given service.
+        :return None:
+        """
+        if isinstance(self.service_provider, BaseMessengerServiceProvider):
             self.service_provider.send_message(
-                event_entity=self.event_entity_dict
+                event_entity=self.event_entity
             )
-        if isinstance(self.service_provider, EmailServiceProvider):
+        if isinstance(self.service_provider, BaseEmailServiceProvider):
             self.service_provider.send_email(
                 event_entity=self.event_entity
             )

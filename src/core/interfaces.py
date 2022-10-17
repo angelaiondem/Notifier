@@ -6,7 +6,7 @@ from src.core.entities import EventEntity
 class BaseMessengerServiceProvider(abc.ABC):
 
     @abc.abstractmethod
-    def send_message(self, event_entity: dict) -> None:
+    def send_message(self, event_entity: EventEntity) -> None:
         """Abstract method is implemented in the inherited class."""
 
 

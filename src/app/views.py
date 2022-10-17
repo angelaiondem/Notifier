@@ -6,11 +6,7 @@ from src.infrastructure.controllers import APIController
 
 class APIView(MethodView):
 
-    @staticmethod
-    def post():
-        request_data = request.json
-        print(type(request_data))
-
+    def post(self) -> None:
+        request_data = request.json  # Type of the data is dictionary.
         api_controller = APIController()
         api_controller.process_event(request_data)
-        return request_data
