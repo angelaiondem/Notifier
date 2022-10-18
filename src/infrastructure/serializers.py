@@ -24,12 +24,14 @@ class EventSerializer:
             validator.check_event_type(event_type)
             if event_type == config.APPROVED_PUBLICATION:
                 validator.check_email_validation(to)
+                body = str(body)
             if event_type == config.NEW_PUBLICATION:
                 validator.check_string_to_dict(body)
+                body = dict(body)
             return {
-                "event_type": event_entity.event_type,
-                "body": event_entity.body,
-                "to": event_entity.to
+                "event_type": event_type,
+                "body": body,
+                "to": to
             }
         except InvalidEventTypeException as err:
             raise InvalidEventTypeException(err) from None
@@ -55,12 +57,14 @@ class EventSerializer:
         try:
             if event_type == config.APPROVED_PUBLICATION:
                 validator.check_email_validation(to)
+                body = str(body)
             if event_type == config.NEW_PUBLICATION:
                 validator.check_string_to_dict(body)
+                body = dict(body)
             return EventEntity(
-                event_type=event_entity_dict.get("event_type"),
-                body=event_entity_dict.get("body"),
-                to=event_entity_dict.get("to")
+                event_type=event_type,
+                body=body,
+                to=to
             )
         except InvalidEventTypeException as err:
             raise InvalidEventTypeException(err) from None

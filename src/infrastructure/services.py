@@ -17,7 +17,7 @@ class SlackService:
             slack_token: str,
             slack_channel: str = config.SLACK_CHANNEL
     ):
-        self.__client = slack.WebClient(token=slack_token)
+        self.__client = slack. WebClient(token=slack_token)
         self.slack_channel = slack_channel
 
     def send_message(self, event_entity: EventEntity) -> None:
@@ -65,7 +65,10 @@ class EmailService:
                 smtp.starttls()
                 smtp.login(self.email_username, self.email_app_pass)
                 msg_text = msg.as_string()
-                smtp.sendmail(self.from_email, event_entity.to, msg_text)
+                smtp.sendmail(
+                    self.from_email,
+                    event_entity.to, msg_text
+                )
         except Exception as err:
             raise EmailIsNotSentException(err) from None
 
