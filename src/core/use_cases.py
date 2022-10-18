@@ -10,7 +10,7 @@ class BaseUseCase(abc.ABC):
 
     @abc.abstractmethod
     def execute(self):
-        pass
+        """Abstract method is implemented in its inherited class."""
 
 
 class NotifierUseCase(BaseUseCase):
@@ -28,7 +28,8 @@ class NotifierUseCase(BaseUseCase):
 
     def execute(self) -> None:
         """
-        Run the data sending method of the given service.
+        Check the service type of an instance and run corresponding
+        data sending method.
         :return None:
         """
         if isinstance(self.service_provider, BaseMessengerServiceProvider):

@@ -1,4 +1,4 @@
-import logging
+from logging import Logger, FileHandler, Formatter
 
 from src.core.exceptions import SlackMessageIsNotSentException, \
     EmailIsNotSentException
@@ -21,17 +21,12 @@ class SlackMessengerProvider(BaseMessengerServiceProvider):
 
     def send_message(self, event_entity: EventEntity) -> None:
         """
-        Post a message(body) to a given slack channel.
+        POST/Send a message(body) to a given(or already defined) slack channel.
         """
         try:
             self._slack_service.send_message(event_entity=event_entity)
-            self._logger_service_provider.info(
-                f"Message is sent to slack: {self._slack_service.slack_channel}"
-            )
         except SlackMessageIsNotSentException as err:
-            self._logger_service_provider.error(
-                f"Couldn't send a message to slack {self._slack_service.slack_channel}: {err}"
-            )
+            raise SlackMessageIsNotSentException(err) from None
 
 
 class EmailServiceProvider(BaseEmailServiceProvider):
@@ -45,15 +40,15 @@ class EmailServiceProvider(BaseEmailServiceProvider):
         self._email_service = email_service
 
     def send_email(self, event_entity: EventEntity) -> None:
+        """
+        POST/Send a message to a given email address.
+        :param event_entity:
+        :return None:
+        """
         try:
             self._email_service.send_email(event_entity)
-            self._logger_service_provider.info(
-                f"Email is sent to\"{event_entity.to}\"."
-            )
         except EmailIsNotSentException as err:
-            self._logger_service_provider.error(
-                f"Couldn't send an email to \"{event_entity.to}\" : {err}."
-            )
+            raise EmailIsNotSentException(err) from None
 
 
 class LoggerServiceProvider(BaseLoggerProvider):
@@ -62,11 +57,15 @@ class LoggerServiceProvider(BaseLoggerProvider):
         self._logger_service = logger_service
 
     @property
-    def logger(self):
-        logger = logging.Logger(name=self._logger_service.logger_name)
+    def logger(self) -> Logger:
+        """
+        Set the logger and the handler parameters.
+        :return:
+        """
+        logger = Logger(name=self._logger_service.logger_name)
         logger.setLevel(self._logger_service.log_level)
-        file_handler = logging.FileHandler(self._logger_service.log_file_path)
-        formatter = logging.Formatter(self._logger_service.log_format)
+        file_handler = FileHandler(self._logger_service.log_file_path)
+        formatter = Formatter(self._logger_service.log_format)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
         return logger

@@ -6,8 +6,8 @@ from email_validator import EmailNotValidError
 from src import config
 from src.core.exceptions import InvalidEventTypeException
 from src.core.use_cases import NotifierUseCase
-from src.infrastructure.providers import EmailServiceProvider, LoggerServiceProvider, \
-    SlackMessengerProvider
+from src.infrastructure.providers import EmailServiceProvider, \
+    LoggerServiceProvider, SlackMessengerProvider
 from src.infrastructure.repositories import ConfigRepo
 from src.infrastructure.serializers import EventSerializer
 from src.infrastructure.services import EmailService, LoggerService, \
@@ -28,6 +28,10 @@ class BaseController(abc.ABC):
 
     @property
     def slack_service(self) -> SlackService:
+        """
+        Check, create and return a SlackService object instance.
+        :return SlackService object:
+        """
         if self._slack_service is None:
             self._slack_service = SlackService(
                 slack_token=self.env_repo.get_one(config.SLACK_TOKEN).value,
@@ -38,7 +42,7 @@ class BaseController(abc.ABC):
     @property
     def email_service(self) -> EmailService:
         """
-        Check, create and return the EmailService object instance.
+        Check, create and return an EmailService object instance.
         :return: EmailService object.
         """
         if self._email_service is None:
@@ -55,7 +59,11 @@ class BaseController(abc.ABC):
         return self._email_service
 
     @property
-    def logger_service(self):
+    def logger_service(self) -> LoggerService:
+        """
+        Check, create and return a LoggerService object instance.
+        :return: LoggerService object.
+        """
         if self._logg_service is None:
             self._logg_service = LoggerService(
                 logger_name=config.LOGGER_NAME,
@@ -66,13 +74,22 @@ class BaseController(abc.ABC):
         return self._logg_service
 
     @property
-    def env_repo(self):
+    def env_repo(self) -> ConfigRepo:
+        """
+        Check, create and return an ConfigRepo object instance.
+        :return: LoggerService object.
+        """
         if self._env_repo is None:
             self._env_repo = ConfigRepo()
         return self._env_repo
 
     @property
     def email_service_provider(self):
+        """
+        Check, create and return an email service provider that provides
+        an email service.
+        :return EmailServiceProvider:
+        """
         if self._email_provider is None:
             self._email_provider = EmailServiceProvider(
                 self.logger_service_provider,
@@ -82,6 +99,11 @@ class BaseController(abc.ABC):
 
     @property
     def messenger_service_provider(self) -> SlackMessengerProvider:
+        """
+        Check, create and return a slack service provider that provides
+        a slack service.
+        :return SlackMessengerProvider:
+        """
         if self._messenger_service_provider is None:
             self._messenger_service_provider = SlackMessengerProvider(
                 self.logger_service_provider, self.slack_service
@@ -89,7 +111,12 @@ class BaseController(abc.ABC):
         return self._messenger_service_provider
 
     @property
-    def logger_service_provider(self):
+    def logger_service_provider(self) -> LoggerServiceProvider:
+        """
+        Check, create and return a logging service provider that provides
+        a logging service.
+        :return LoggerServiceProvider:
+        """
         if self._logger_service_provider is None:
             self._logger_service_provider = LoggerServiceProvider(
                 self.logger_service
@@ -100,6 +127,12 @@ class BaseController(abc.ABC):
 class APIController(BaseController):
 
     def process_event(self, request_data: dict[str, str]):
+        """
+        Get POST request data, deserialize to EventEntity and, according to
+        data, continue executing the appropriate use case.
+        :param request_data:
+        :return None:
+        """
         try:
             event_entity = EventSerializer.deserialize(request_data)
             self.logger_service_provider.info("Request data is deserialized.")
@@ -123,9 +156,11 @@ class APIController(BaseController):
                 )
         except InvalidEventTypeException as err:
             self.logger_service_provider.error(f"Event Type is invalid: {err}")
-        except EmailNotValidError as err:  # f"Email is not valid:  {to}"
+        except EmailNotValidError as err:
             self.logger_service_provider.error(f"Email is invalid: {err}")
-        except ValueError as err:  #
+        except ValueError as err:
             self.logger_service_provider.error(f"Slack body type error: {err}")
         except Exception as err:
-            self.logger_service_provider.error(f"Process_event is failed:{err}")
+            self.logger_service_provider.error(
+                f"Event is failed to process:{err}"
+            )

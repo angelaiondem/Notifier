@@ -12,7 +12,6 @@ def check_email_validation(email_address: str) -> bool:
     """
     try:
         if validate_email(email_address, timeout=3).email:
-            print("email is true")
             return True
         else:
             raise EmailNotValidError
@@ -24,7 +23,7 @@ def check_email_validation(email_address: str) -> bool:
 
 def check_event_type(event_type: str) -> bool:
     """
-    Check if the event type is one of the defined types.
+    Check if the event_type is one of the defined types.
     :param event_type:
     :return boolean:
     """
@@ -36,7 +35,7 @@ def check_event_type(event_type: str) -> bool:
 
 def check_string_to_dict(slack_body: str) -> bool:
     """
-    Check is the given string is a dictionary.
+    Check if the given string is a dictionary.
     :param slack_body:
     :return boolean:
     """

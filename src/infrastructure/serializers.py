@@ -11,6 +11,12 @@ class EventSerializer:
 
     @staticmethod
     def serialize(event_entity: EventEntity) -> dict:
+        """
+        Based on the given EventEntity class data, check all data values and,
+        return a dictionary type data.
+        :param event_entity:
+        :return dict:
+        """
         event_type = event_entity.event_type
         body = event_entity.body
         to = event_entity.to
@@ -26,21 +32,22 @@ class EventSerializer:
                 "to": event_entity.to
             }
         except InvalidEventTypeException as err:
-            raise InvalidEventTypeException(
-                err) from None  # f"Event Type is not valid:  {event_type}"
-        except EmailNotValidError:
-            raise EmailNotValidError(
-                f"Email is not valid:  {to}"
-            )
+            raise InvalidEventTypeException(err) from None
+        except EmailNotValidError as err:
+            raise EmailNotValidError(err) from None
         except ValueError as err:
-            raise ValueError(
-                f"Slack body is not a dictionary:  {body}"
-            )
+            raise ValueError(err) from None
         except Exception as err:
-            raise SerializationFailedException("Deserialization failed", err)
+            raise SerializationFailedException(err) from None
 
     @staticmethod
     def deserialize(event_entity_dict: dict[str:str]) -> EventEntity:
+        """
+        Based on the given dictionary type data, check all data values and,
+        return an EventEntity type object.
+        :param event_entity_dict:
+        :return EventEntity:
+        """
         event_type = event_entity_dict.get("event_type")
         body = event_entity_dict.get("body")
         to = event_entity_dict.get("to")
@@ -56,12 +63,10 @@ class EventSerializer:
                 to=event_entity_dict.get("to")
             )
         except InvalidEventTypeException as err:
-            # f"Event Type is not valid:  {event_type}"
             raise InvalidEventTypeException(err) from None
-
-        except EmailNotValidError as err:  # f"Email is not valid:  {to}"
+        except EmailNotValidError as err:
             raise EmailNotValidError(err) from None
-        except ValueError as err:  # f"Slack body is not a dictionary:  {body}"
+        except ValueError as err:
             raise ValueError(err)
-        except Exception as err:  # "Deserialization failed", err
+        except Exception as err:
             raise DeserializationFailedException(err) from None

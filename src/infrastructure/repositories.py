@@ -17,6 +17,11 @@ class ConfigRepo(scr.BaseRepository):
         load_dotenv(self.dot_env_path)
 
     def get_one(self, key: str) -> EnvItemEntity:
+        """
+        Based on the given key return the key-value pair.
+        :param key:
+        :return EnvItemEntity:
+        """
         env_value = os.environ.get(key)
         env_item_entity = EnvItemEntity(key=key, value=env_value)
         return env_item_entity
