@@ -12,6 +12,10 @@ class SlackMessageIsNotSentException(Exception):
     """Throw when email sending process catches an exception."""
 
 
+class SlackBodyKeysAreInvalidException(Exception):
+    """Throw when slack body keys don't are wrong."""
+
+
 class SerializationFailedException(Exception):
     """Throw when serialization is failed."""
 

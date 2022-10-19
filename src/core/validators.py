@@ -1,7 +1,8 @@
 from email_validator import validate_email, EmailNotValidError
 
 from src import config
-from src.core.exceptions import InvalidEventTypeException
+from src.core.exceptions import InvalidEventTypeException, \
+    SlackBodyKeysAreInvalidException
 
 
 def check_email_validation(email_address: str) -> bool:
@@ -44,3 +45,10 @@ def check_string_to_dict(slack_body: str) -> bool:
         return True
     except ValueError as err:
         raise ValueError(err) from None
+
+
+def check_body_dict_content(body: dict[str, str]) -> bool:
+    if list(body.keys()) == config.BODY_KEYS:
+        return True
+    else:
+        raise SlackBodyKeysAreInvalidException

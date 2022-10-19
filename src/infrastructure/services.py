@@ -15,10 +15,8 @@ class SlackService:
     def __init__(
             self,
             slack_token: str,
-            slack_channel: str = config.SLACK_CHANNEL
     ):
         self.__client = slack. WebClient(token=slack_token)
-        self.slack_channel = slack_channel
 
     def send_message(self, event_entity: EventEntity) -> None:
         """
@@ -26,10 +24,11 @@ class SlackService:
         :event_entity body:
         :return None:
         """
+        body = dict(event_entity.body)
         try:
             self.__client.chat_postMessage(
-                channel=self.slack_channel,
-                text=event_entity.body
+                channel=body.get(config.BODY_CHANNEL),
+                text=body.get(config.BODY_MESSAGE)
             )
         except Exception as err:
             raise SlackMessageIsNotSentException(err) from None

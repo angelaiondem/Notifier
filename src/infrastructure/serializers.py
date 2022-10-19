@@ -4,7 +4,8 @@ from src import config
 from src.core.entities import EventEntity
 import src.core.validators as validator
 from src.core.exceptions import DeserializationFailedException, \
-    SerializationFailedException, InvalidEventTypeException
+    SerializationFailedException, InvalidEventTypeException, \
+    SlackBodyKeysAreInvalidException
 
 
 class EventSerializer:
@@ -28,6 +29,7 @@ class EventSerializer:
             if event_type == config.NEW_PUBLICATION:
                 validator.check_string_to_dict(body)
                 body = dict(body)
+                validator.check_body_dict_content(body)
             return {
                 "event_type": event_type,
                 "body": body,
@@ -37,6 +39,8 @@ class EventSerializer:
             raise InvalidEventTypeException(err) from None
         except EmailNotValidError as err:
             raise EmailNotValidError(err) from None
+        except SlackBodyKeysAreInvalidException as err:
+            raise SlackBodyKeysAreInvalidException(err) from None
         except ValueError as err:
             raise ValueError(err) from None
         except Exception as err:
@@ -61,6 +65,7 @@ class EventSerializer:
             if event_type == config.NEW_PUBLICATION:
                 validator.check_string_to_dict(body)
                 body = dict(body)
+                validator.check_body_dict_content(body)
             return EventEntity(
                 event_type=event_type,
                 body=body,
@@ -70,6 +75,8 @@ class EventSerializer:
             raise InvalidEventTypeException(err) from None
         except EmailNotValidError as err:
             raise EmailNotValidError(err) from None
+        except SlackBodyKeysAreInvalidException as err:
+            raise SlackBodyKeysAreInvalidException(err) from None
         except ValueError as err:
             raise ValueError(err)
         except Exception as err:
