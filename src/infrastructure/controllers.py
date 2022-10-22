@@ -7,7 +7,7 @@ from flask import jsonify
 from src import config
 from src.core.exceptions import InvalidEventTypeException, \
     EmailIsNotSentException, SlackMessageIsNotSentException, \
-    SlackBodyKeysAreInvalidException
+    MessageBodyIsInvalidException
 from src.core.use_cases import NotifierUseCase
 from src.infrastructure.providers import EmailServiceProvider, \
     LoggerServiceProvider, SlackMessengerProvider
@@ -127,18 +127,17 @@ class BaseController(abc.ABC):
 
 
 class APIController(BaseController):
-    _STATUS_FAILED = {"status": "failed"}
-    _STATUS_SUCCESS = {"status": "success"}
 
-    def process_event(self, request_data: dict[str, str]):
+    def process_event(self, event_data: dict[str, str]):
         """
         Get POST request data, deserialize to EventEntity and, according to
         data, continue executing the appropriate use case.
-        :param request_data:
+        :param event_data:
         :return None:
         """
         try:
-            event_entity = EventSerializer.deserialize(request_data)
+            event_serializer = EventSerializer(self.logger_service_provider)
+            event_entity = event_serializer.deserialize(event_data)
             self.logger_service_provider.info("Request data is deserialized.")
             if event_entity.event_type == config.NEW_PUBLICATION:
                 notifier_use_case = NotifierUseCase(
@@ -146,45 +145,32 @@ class APIController(BaseController):
                     self.messenger_service_provider
                 )
                 notifier_use_case.execute()
-                self.logger_service_provider.info(
-                    f"Message is sent to slack channel: {config.SLACK_CHANNEL}"
-                )
-                return jsonify(self._STATUS_FAILED), 200
+                return jsonify({"status": "success",
+                                "message": "Slack message is sent."}), 200
             elif event_entity.event_type == config.APPROVED_PUBLICATION:
                 notifier_use_case = NotifierUseCase(
                     event_entity,
                     self.email_service_provider
                 )
                 notifier_use_case.execute()
-                self.logger_service_provider.info(
-                    f"Email is sent to: {event_entity.to}"
-                )
-                return jsonify(self._STATUS_SUCCESS), 200
-        except InvalidEventTypeException as err:
-            self.logger_service_provider.error(f"Event Type is invalid: {err}")
-            return jsonify(self._STATUS_FAILED), 400
-        except EmailNotValidError as err:
-            self.logger_service_provider.error(f"Email is invalid: {err}")
-            return jsonify(self._STATUS_FAILED), 400
-        except SlackBodyKeysAreInvalidException as err:
-            self.logger_service_provider.error(
-                f"Slack body keys are invalid:  {err}")
-            return jsonify(self._STATUS_FAILED), 400
-        except ValueError as err:
-            self.logger_service_provider.error(f"Slack body type error: {err}")
-            return jsonify(self._STATUS_FAILED), 400
-        except EmailIsNotSentException as err:
-            self.logger_service_provider.error(
-                f"Failed to send email. {err}"
-            )
-            return jsonify(self._STATUS_FAILED), 400
-        except SlackMessageIsNotSentException as err:
-            self.logger_service_provider.error(
-                f"Failed to send message to slack. {err}"
-            )
-            return jsonify(self._STATUS_FAILED), 400
+                return jsonify({"status": "success",
+                                "message": "Email is sent."}), 200
+        except InvalidEventTypeException:
+            return jsonify({"status": "fail",
+                            "error": "Invalid event type."}), 400
+        except EmailNotValidError:
+            return jsonify({"status": "fail",
+                            "error": "Invalid email address."}), 400
+        except MessageBodyIsInvalidException:
+            return jsonify({"status": "fail",
+                            "error": "Invalid message body"}), 400
+        except EmailIsNotSentException:
+            return jsonify({"status": "fail",
+                            "error": "Failed to send email."}), 400
+        except SlackMessageIsNotSentException:
+            return jsonify({"status": "fail",
+                            "error": "Failed to send message to slack."}), 400
         except Exception as err:
             self.logger_service_provider.error(
-                f"Unexpected error: event is failed to process:{err}"
-            )
-            return jsonify(self._STATUS_FAILED), 400
+                f"Unexpected error: event is failed to process:{err}")
+            return jsonify({"status": "fail", "error": "Unexpected error"}), 400

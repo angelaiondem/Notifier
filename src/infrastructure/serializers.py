@@ -3,15 +3,17 @@ from email_validator import EmailNotValidError
 from src import config
 from src.core.entities import EventEntity
 import src.core.validators as validator
-from src.core.exceptions import DeserializationFailedException, \
-    SerializationFailedException, InvalidEventTypeException, \
-    SlackBodyKeysAreInvalidException
+from src.core.exceptions import InvalidEventTypeException, \
+    MessageBodyIsInvalidException, DeserializationFailedException
+from src.infrastructure.providers import LoggerServiceProvider
 
 
 class EventSerializer:
 
-    @staticmethod
-    def serialize(event_entity: EventEntity) -> dict:
+    def __init__(self, logger_service_provider: LoggerServiceProvider):
+        self.logger_service_provider = logger_service_provider
+
+    def serialize(self, event_entity: EventEntity) -> dict[str, str]:
         """
         Based on the given EventEntity class data, check all data values and,
         return a dictionary type data.
@@ -25,29 +27,27 @@ class EventSerializer:
             validator.check_event_type(event_type)
             if event_type == config.APPROVED_PUBLICATION:
                 validator.check_email_validation(to)
-                body = str(body)
-            if event_type == config.NEW_PUBLICATION:
-                validator.check_string_to_dict(body)
-                body = dict(body)
-                validator.check_body_dict_content(body)
+            validator.check_event_body(body)
             return {
                 "event_type": event_type,
                 "body": body,
                 "to": to
             }
         except InvalidEventTypeException as err:
+            self.logger_service_provider.error(f"Event Type is invalid: {err}")
             raise InvalidEventTypeException(err) from None
         except EmailNotValidError as err:
+            self.logger_service_provider.error(f"Email is invalid: {err}")
             raise EmailNotValidError(err) from None
-        except SlackBodyKeysAreInvalidException as err:
-            raise SlackBodyKeysAreInvalidException(err) from None
-        except ValueError as err:
-            raise ValueError(err) from None
+        except MessageBodyIsInvalidException as err:
+            self.logger_service_provider.error(f"Invalid message body: {err}")
+            raise MessageBodyIsInvalidException(err) from None
         except Exception as err:
-            raise SerializationFailedException(err) from None
+            self.logger_service_provider.error(
+                f"Unexpected: error while serializing: {err}")
+            raise DeserializationFailedException(err) from None
 
-    @staticmethod
-    def deserialize(event_entity_dict: dict[str:str]) -> EventEntity:
+    def deserialize(self, event_entity_dict: dict[str:str]) -> EventEntity:
         """
         Based on the given dictionary type data, check all data values and,
         return an EventEntity type object.
@@ -61,23 +61,22 @@ class EventSerializer:
         try:
             if event_type == config.APPROVED_PUBLICATION:
                 validator.check_email_validation(to)
-                body = str(body)
-            if event_type == config.NEW_PUBLICATION:
-                validator.check_string_to_dict(body)
-                body = dict(body)
-                validator.check_body_dict_content(body)
+            validator.check_event_body(body)
             return EventEntity(
                 event_type=event_type,
                 body=body,
                 to=to
             )
         except InvalidEventTypeException as err:
+            self.logger_service_provider.error(f"Event Type is invalid: {err}")
             raise InvalidEventTypeException(err) from None
         except EmailNotValidError as err:
+            self.logger_service_provider.error(f"Email is invalid: {err}")
             raise EmailNotValidError(err) from None
-        except SlackBodyKeysAreInvalidException as err:
-            raise SlackBodyKeysAreInvalidException(err) from None
-        except ValueError as err:
-            raise ValueError(err)
+        except MessageBodyIsInvalidException as err:
+            self.logger_service_provider.error(f"Invalid message body: {err}")
+            raise MessageBodyIsInvalidException(err) from None
         except Exception as err:
+            self.logger_service_provider.error(
+                f"Unexpected: error while serializing: {err}")
             raise DeserializationFailedException(err) from None

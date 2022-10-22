@@ -12,11 +12,9 @@ from src.core.exceptions import EmailIsNotSentException, \
 
 class SlackService:
 
-    def __init__(
-            self,
-            slack_token: str,
-    ):
+    def __init__(self, slack_token: str):
         self.__client = slack. WebClient(token=slack_token)
+        self.__channel_id = config.SLACK_CHANNEL_ID
 
     def send_message(self, event_entity: EventEntity) -> None:
         """
@@ -24,11 +22,10 @@ class SlackService:
         :event_entity body:
         :return None:
         """
-        body = dict(event_entity.body)
         try:
             self.__client.chat_postMessage(
-                channel=body.get(config.BODY_CHANNEL),
-                text=body.get(config.BODY_MESSAGE)
+                channel=self.__channel_id,
+                text=event_entity.body
             )
         except Exception as err:
             raise SlackMessageIsNotSentException(err) from None
@@ -65,8 +62,9 @@ class EmailService:
                 smtp.login(self.email_username, self.email_app_pass)
                 msg_text = msg.as_string()
                 smtp.sendmail(
-                    self.from_email,
-                    event_entity.to, msg_text
+                    from_addr=self.from_email,
+                    to_addrs=event_entity.to,
+                    msg=msg_text
                 )
         except Exception as err:
             raise EmailIsNotSentException(err) from None

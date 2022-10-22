@@ -16,7 +16,7 @@ FROM_EMAIL = "FROM_EMAIL"  # From .env file
 EMAIL_SUBJECT = "Approved publication"
 
 # Slack configurations.
-SLACK_CHANNEL = "#notifier_new_publication"
+SLACK_CHANNEL_ID = "C0447N114NP"
 SLACK_TOKEN = "SLACK_TOKEN"  # From .env file
 
 # Event Types.

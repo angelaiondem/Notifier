@@ -2,7 +2,31 @@ from email_validator import validate_email, EmailNotValidError
 
 from src import config
 from src.core.exceptions import InvalidEventTypeException, \
-    SlackBodyKeysAreInvalidException
+    MessageBodyIsInvalidException
+
+
+def check_event_type(event_type: str) -> bool:
+    """
+    Check if the event_type is one of the defined types.
+    :param event_type:
+    :return boolean:
+    """
+    if event_type in [config.NEW_PUBLICATION, config.APPROVED_PUBLICATION]:
+        return True
+    else:
+        raise InvalidEventTypeException
+
+
+def check_event_body(body: str) -> bool:
+    """
+    Check if the given string is not empty.
+    :param body:
+    :return boolean:
+    """
+    if isinstance(body, str) and body:
+        return True
+    else:
+        raise MessageBodyIsInvalidException
 
 
 def check_email_validation(email_address: str) -> bool:
@@ -20,35 +44,3 @@ def check_email_validation(email_address: str) -> bool:
         raise EmailNotValidError(err) from None
     except Exception as err:
         raise EmailNotValidError(err) from None
-
-
-def check_event_type(event_type: str) -> bool:
-    """
-    Check if the event_type is one of the defined types.
-    :param event_type:
-    :return boolean:
-    """
-    if event_type in [config.NEW_PUBLICATION, config.APPROVED_PUBLICATION]:
-        return True
-    else:
-        raise InvalidEventTypeException
-
-
-def check_string_to_dict(slack_body: str) -> bool:
-    """
-    Check if the given string is a dictionary.
-    :param slack_body:
-    :return boolean:
-    """
-    try:
-        dict(slack_body)
-        return True
-    except ValueError as err:
-        raise ValueError(err) from None
-
-
-def check_body_dict_content(body: dict[str, str]) -> bool:
-    if list(body.keys()) == config.BODY_KEYS:
-        return True
-    else:
-        raise SlackBodyKeysAreInvalidException

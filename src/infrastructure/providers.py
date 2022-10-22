@@ -1,5 +1,6 @@
 from logging import Logger, FileHandler, Formatter
 
+from src import config
 from src.core.exceptions import SlackMessageIsNotSentException, \
     EmailIsNotSentException
 from src.core.interfaces import BaseMessengerServiceProvider, \
@@ -21,11 +22,15 @@ class SlackMessengerProvider(BaseMessengerServiceProvider):
 
     def send_message(self, event_entity: EventEntity) -> None:
         """
-        POST/Send a message(body) to a given(or already defined) slack channel.
+        POST/Send a message(body) to a defined slack channel.
         """
         try:
             self._slack_service.send_message(event_entity=event_entity)
+            self._logger_service_provider.info(
+                f"Slack message is sent. ID: {config.SLACK_CHANNEL_ID}")
         except SlackMessageIsNotSentException as err:
+            self._logger_service_provider.error(
+                f"Failed to send slack message. ID: {config.SLACK_CHANNEL_ID}")
             raise SlackMessageIsNotSentException(err) from None
 
 
@@ -47,7 +52,11 @@ class EmailServiceProvider(BaseEmailServiceProvider):
         """
         try:
             self._email_service.send_email(event_entity)
+            self._logger_service_provider.info(
+                f"Email is sent. Address: {event_entity.to}")
         except EmailIsNotSentException as err:
+            self._logger_service_provider.error(
+                f"Failed to send an email. Address: {event_entity.to}")
             raise EmailIsNotSentException(err) from None
 
 
