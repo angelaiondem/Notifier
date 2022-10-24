@@ -13,7 +13,7 @@ from src.core.exceptions import EmailIsNotSentException, \
 class SlackService:
 
     def __init__(self, slack_token: str):
-        self.__client = slack. WebClient(token=slack_token)
+        self.__client = slack.WebClient(token=slack_token)
         self.__channel_id = config.SLACK_CHANNEL_ID
 
     def send_message(self, event_entity: EventEntity) -> None:

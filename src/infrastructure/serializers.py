@@ -1,10 +1,9 @@
-from email_validator import EmailNotValidError
-
 from src import config
 from src.core.entities import EventEntity
 import src.core.validators as validator
 from src.core.exceptions import InvalidEventTypeException, \
-    MessageBodyIsInvalidException, DeserializationFailedException
+    MessageBodyIsInvalidException, DeserializationFailedException, \
+    SerializationFailedException, InvalidEmailException
 from src.infrastructure.providers import LoggerServiceProvider
 
 
@@ -36,16 +35,16 @@ class EventSerializer:
         except InvalidEventTypeException as err:
             self.logger_service_provider.error(f"Event Type is invalid: {err}")
             raise InvalidEventTypeException(err) from None
-        except EmailNotValidError as err:
+        except InvalidEmailException as err:
             self.logger_service_provider.error(f"Email is invalid: {err}")
-            raise EmailNotValidError(err) from None
+            raise InvalidEmailException(err) from None
         except MessageBodyIsInvalidException as err:
             self.logger_service_provider.error(f"Invalid message body: {err}")
             raise MessageBodyIsInvalidException(err) from None
         except Exception as err:
             self.logger_service_provider.error(
                 f"Unexpected: error while serializing: {err}")
-            raise DeserializationFailedException(err) from None
+            raise SerializationFailedException(err) from None
 
     def deserialize(self, event_entity_dict: dict[str:str]) -> EventEntity:
         """
@@ -57,8 +56,8 @@ class EventSerializer:
         event_type = event_entity_dict.get("event_type")
         body = event_entity_dict.get("body")
         to = event_entity_dict.get("to")
-        validator.check_event_type(event_type)
         try:
+            validator.check_event_type(event_type)
             if event_type == config.APPROVED_PUBLICATION:
                 validator.check_email_validation(to)
             validator.check_event_body(body)
@@ -70,13 +69,13 @@ class EventSerializer:
         except InvalidEventTypeException as err:
             self.logger_service_provider.error(f"Event Type is invalid: {err}")
             raise InvalidEventTypeException(err) from None
-        except EmailNotValidError as err:
+        except InvalidEmailException as err:
             self.logger_service_provider.error(f"Email is invalid: {err}")
-            raise EmailNotValidError(err) from None
+            raise InvalidEmailException(err) from None
         except MessageBodyIsInvalidException as err:
             self.logger_service_provider.error(f"Invalid message body: {err}")
             raise MessageBodyIsInvalidException(err) from None
         except Exception as err:
             self.logger_service_provider.error(
-                f"Unexpected: error while serializing: {err}")
+                f"Unexpected: error while deserializing: {err}")
             raise DeserializationFailedException(err) from None

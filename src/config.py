@@ -2,7 +2,7 @@ import logging
 from os.path import join, dirname, abspath
 
 # Logging configurations.
-LOGGER_NAME = logging.getLogger(__name__)
+LOGGER_NAME = logging.getLogger(__name__).name
 LOG_FILE_PATH = join(dirname(dirname(abspath(__file__))), "notifier.log")
 DEFAULT_LOG_LEVEL = logging.INFO
 DEFAULT_LOG_FORMAT = "%(asctime)s: %(levelname)s: %(message)s"

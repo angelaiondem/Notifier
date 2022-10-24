@@ -1,22 +1,22 @@
 [
   {
     "event_type": "new_publication",
-    "body": "Organizing what’s happening in the world to help you learn more about the stories that matter. Learn more at news.google.com.",
-    "to": "anzhela.iondem@gmail.com"
+    "body": "Dear mediator,\nThere is a new publication.\nPlease check it.",
+    "to": ""
   },
   {
-    "event_type": "new_publication",
-    "body": "If you can change the data format, then you can substitute an array of strings.",
+    "event_type": "ew_publication",
+    "body": "Dear mediator,\nThere is a new publication.\nPlease check it.",
     "to": "angelaiondem@yahoo.com"
   },
   {
     "event_type": "new_publication",
-    "body": "A new news product and partnerships with some of the most respected local, regional and national publications.",
+    "body": "",
     "to": "angelaiondem@yahoo.com"
   },
   {
     "event_type": "new_publication",
-    "body": "Google is helping you make sense of the world by making it easier to find diverse perspectives when you search.",
+    "body": {"channel": "#notifier", "text": "Hi."},
     "to": "angelaiondem@yahoo.com"
   }
 ]

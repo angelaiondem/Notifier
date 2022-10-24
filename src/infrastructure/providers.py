@@ -80,13 +80,13 @@ class LoggerServiceProvider(BaseLoggerProvider):
         return logger
 
     def info(self, message: str) -> None:
-        return self.logger.info(message)
+        self.logger.info(message)
 
     def warning(self, message: str) -> None:
-        return self.logger.warning(message)
+        self.logger.warning(message)
 
     def error(self, message: str) -> None:
-        return self.logger.error(message)
+        self.logger.error(message)
 
     def critical(self, message: str) -> None:
-        return self.logger.critical(message)
+        self.logger.critical(message)

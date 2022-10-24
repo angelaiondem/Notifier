@@ -1,22 +1,27 @@
 [
   {
     "event_type": "approved_publication",
-    "body": "{}",
-    "to": "None"
-  },
-  {
-    "event_type": "new_publication",
-    "body": "If you can change the data format, then you can substitute an array of strings.",
+    "body": "Dear Ms./Mr.\nYour publication is approved.",
     "to": "angelaiondem@yahoo.com"
   },
   {
-    "event_type": "new_publication",
-    "body": "A new news product and partnerships with some of the most respected local, regional and national publications.",
+    "event_type": "proved_publication",
+    "body": "Dear Ms./Mr.\nYour publication is approved.",
     "to": "angelaiondem@yahoo.com"
   },
   {
-    "event_type": "new_publication",
-    "body": "Google is helping you make sense of the world by making it easier to find diverse perspectives when you search.",
+    "event_type": "_publication",
+    "body": "",
+    "to": "angelaiondem@yahoo.com"
+  },
+  {
+    "event_type": "approved_publication",
+    "body": "Dear Ms./Mr.\nYour publication is approved.",
+    "to": "angelaiondem@yahoo"
+  },
+    {
+    "event_type": "approved_publication",
+    "body": {"channel": "#notifier", "text": "Hi."},
     "to": "angelaiondem@yahoo.com"
   }
 ]

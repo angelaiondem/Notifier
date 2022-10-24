@@ -1,13 +1,13 @@
 import abc
 from typing import Optional
 
-from email_validator import EmailNotValidError
 from flask import jsonify
 
 from src import config
 from src.core.exceptions import InvalidEventTypeException, \
     EmailIsNotSentException, SlackMessageIsNotSentException, \
-    MessageBodyIsInvalidException
+    MessageBodyIsInvalidException, DeserializationFailedException, \
+    FailedToGetEnvItemEntityException, InvalidEmailException
 from src.core.use_cases import NotifierUseCase
 from src.infrastructure.providers import EmailServiceProvider, \
     LoggerServiceProvider, SlackMessengerProvider
@@ -155,22 +155,24 @@ class APIController(BaseController):
                 notifier_use_case.execute()
                 return jsonify({"status": "success",
                                 "message": "Email is sent."}), 200
-        except InvalidEventTypeException:
-            return jsonify({"status": "fail",
-                            "error": "Invalid event type."}), 400
-        except EmailNotValidError:
-            return jsonify({"status": "fail",
-                            "error": "Invalid email address."}), 400
-        except MessageBodyIsInvalidException:
-            return jsonify({"status": "fail",
-                            "error": "Invalid message body"}), 400
-        except EmailIsNotSentException:
-            return jsonify({"status": "fail",
-                            "error": "Failed to send email."}), 400
-        except SlackMessageIsNotSentException:
-            return jsonify({"status": "fail",
-                            "error": "Failed to send message to slack."}), 400
+        except InvalidEventTypeException as err:
+            return jsonify(err.message), 400
+        except InvalidEmailException as err:
+            return jsonify(err.message), 400
+        except MessageBodyIsInvalidException as err:
+            return jsonify(err.message), 400
+        except EmailIsNotSentException as err:
+            return jsonify(err), 400
+        except SlackMessageIsNotSentException as err:
+            return jsonify(err.message), 400
+        except DeserializationFailedException as err:
+            return jsonify(err.message), 400
+        except FailedToGetEnvItemEntityException as err:
+            self.logger_service_provider.error(
+                f"Failed to get an environmental variable.")
+            return jsonify(err), 400
         except Exception as err:
             self.logger_service_provider.error(
                 f"Unexpected error: event is failed to process:{err}")
-            return jsonify({"status": "fail", "error": "Unexpected error"}), 400
+            return jsonify({"status": "failed",
+                            "error": "Unexpected error"}), 400

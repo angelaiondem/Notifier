@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 import src.core.repositories as scr
 from src.core.entities import EnvItemEntity
+from src.core.exceptions import FailedToGetEnvItemEntityException
 
 
 class ConfigRepo(scr.BaseRepository):
@@ -23,5 +24,7 @@ class ConfigRepo(scr.BaseRepository):
         :return EnvItemEntity:
         """
         env_value = os.environ.get(key)
+        if env_value is None:
+            raise FailedToGetEnvItemEntityException
         env_item_entity = EnvItemEntity(key=key, value=env_value)
         return env_item_entity

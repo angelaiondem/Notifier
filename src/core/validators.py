@@ -2,7 +2,7 @@ from email_validator import validate_email, EmailNotValidError
 
 from src import config
 from src.core.exceptions import InvalidEventTypeException, \
-    MessageBodyIsInvalidException
+    MessageBodyIsInvalidException, InvalidEmailException
 
 
 def check_event_type(event_type: str) -> bool:
@@ -19,7 +19,7 @@ def check_event_type(event_type: str) -> bool:
 
 def check_event_body(body: str) -> bool:
     """
-    Check if the given string is not empty.
+    Check if the given string is not an empty string.
     :param body:
     :return boolean:
     """
@@ -36,11 +36,11 @@ def check_email_validation(email_address: str) -> bool:
     :return: boolean
     """
     try:
-        if validate_email(email_address, timeout=3).email:
+        if validate_email(email_address, timeout=2).email:
             return True
         else:
             raise EmailNotValidError
     except EmailNotValidError as err:
-        raise EmailNotValidError(err) from None
+        raise InvalidEmailException(err) from None
     except Exception as err:
-        raise EmailNotValidError(err) from None
+        raise InvalidEmailException(err) from None
