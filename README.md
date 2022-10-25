@@ -1,6 +1,6 @@
 # Notifier APP 
 ### Summary
-The App is designed to get the POST request and, based on to the request's "event_type" value, to send a message either to the defined Slack channel or to the provided email address.
+The App is designed to get the POST request and, based on the "event_type" value of the request, to send a message either to the defined Slack channel or to the provided email address.
 
 ### Requirements
 Python 3.9.1 and upper versions.\
