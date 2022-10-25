@@ -1,3 +1,4 @@
+import logging
 from logging import Logger, FileHandler, Formatter
 
 from src import config
@@ -71,7 +72,7 @@ class LoggerServiceProvider(BaseLoggerProvider):
         Set the logger and the handler parameters.
         :return:
         """
-        logger = Logger(name=self._logger_service.logger_name)
+        logger = logging.getLogger(name=self._logger_service.logger_name)
         logger.setLevel(self._logger_service.log_level)
         file_handler = FileHandler(self._logger_service.log_file_path)
         formatter = Formatter(self._logger_service.log_format)
