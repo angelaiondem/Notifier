@@ -1,3 +1,5 @@
+import logging
+from logging import Logger, FileHandler, Formatter
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -82,3 +84,18 @@ class LoggerService:
         self.log_format = formatter
         self.log_file_path = log_file_path
         self.log_level = log_level
+
+    @property
+    def logger(self) -> Logger:
+        """
+        Set the logger and the handler parameters.
+        :return logger:
+        """
+        logger = logging.getLogger(name=self.logger_name)
+        if not len(logger.handlers):
+            logger.setLevel(self.log_level)
+            file_handler = FileHandler(self.log_file_path)
+            formatter = Formatter(self.log_format)
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+        return logger

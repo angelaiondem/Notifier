@@ -1,6 +1,3 @@
-import logging
-from logging import Logger, FileHandler, Formatter
-
 from src import config
 from src.core.exceptions import SlackMessageIsNotSentException, \
     EmailIsNotSentException
@@ -66,28 +63,14 @@ class LoggerServiceProvider(BaseLoggerProvider):
     def __init__(self, logger_service: LoggerService):
         self._logger_service = logger_service
 
-    @property
-    def logger(self) -> Logger:
-        """
-        Set the logger and the handler parameters.
-        :return:
-        """
-        logger = logging.getLogger(name=self._logger_service.logger_name)
-        logger.setLevel(self._logger_service.log_level)
-        file_handler = FileHandler(self._logger_service.log_file_path)
-        formatter = Formatter(self._logger_service.log_format)
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-        return logger
-
     def info(self, message: str) -> None:
-        self.logger.info(message)
+        self._logger_service.logger.info(message)
 
     def warning(self, message: str) -> None:
-        self.logger.warning(message)
+        self._logger_service.logger.warning(message)
 
     def error(self, message: str) -> None:
-        self.logger.error(message)
+        self._logger_service.logger.error(message)
 
     def critical(self, message: str) -> None:
-        self.logger.critical(message)
+        self._logger_service.logger.critical(message)
