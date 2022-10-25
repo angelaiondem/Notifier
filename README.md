@@ -1,5 +1,5 @@
-#Notifier APP 
-###Summary
+# Notifier APP 
+### Summary
 The App is designed to get the POST request and, based on to the request's "event_type" value, to send a message either to the defined Slack channel or to the provided email address.
 
 ### Requirements
@@ -13,7 +13,7 @@ External libraries:
 - slack-sdk==3.18.3 
 - slackclient==2.9.4 
 
-###POST Request Structure
+### POST Request Structure
 Body content type: Application/json \
 Json body ex.: \
 { \
