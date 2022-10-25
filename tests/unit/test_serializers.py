@@ -1,29 +1,23 @@
 import unittest
-import logging
-from os.path import join, dirname, abspath
+from unittest.mock import patch
 
-from src import config
 from src.core.exceptions import InvalidEventTypeException, \
     MessageBodyIsInvalidException, InvalidEmailException
-from src.infrastructure.providers import LoggerServiceProvider
 from src.infrastructure.serializers import EventSerializer
 from src.core.entities import EventEntity
-from src.infrastructure.services import LoggerService
 
 
 class TestSerializers(unittest.TestCase):
 
-    def setUp(self) -> None:
-        self.log_file_path = join((dirname(abspath(__file__))), "notifier.log")
-        logger_service_provider = LoggerServiceProvider(LoggerService(
-            logger_name=logging.getLogger(__name__).name,
-            formatter=config.DEFAULT_LOG_FORMAT,
-            log_file_path=self.log_file_path,
-            log_level=config.DEFAULT_LOG_LEVEL))
-        self.serializer = EventSerializer(logger_service_provider)
+    @patch("src.infrastructure.serializers.LoggerServiceProvider")
+    def setUp(self, mock_logger) -> None:
+        self.event_serializer = EventSerializer(mock_logger)
+
+    def tearDown(self) -> None:
+        del self.event_serializer
 
     def test_serialize(self):
-        self.assertEqual(self.serializer.serialize(
+        self.assertEqual(self.event_serializer.serialize(
             EventEntity(
                 event_type="new_publication",
                 body="Hi.",
@@ -33,7 +27,7 @@ class TestSerializers(unittest.TestCase):
              "body": "Hi.",
              "to": None})
 
-        self.assertEqual(self.serializer.serialize(
+        self.assertEqual(self.event_serializer.serialize(
             EventEntity(
                 event_type="approved_publication",
                 body="This is a Test message.",
@@ -43,7 +37,7 @@ class TestSerializers(unittest.TestCase):
              "body": "This is a Test message.",
              "to": "ang@gmail.com"})
 
-        self.assertEqual(self.serializer.serialize(
+        self.assertEqual(self.event_serializer.serialize(
             EventEntity(
                 event_type="new_publication",
                 body="Hello.",
@@ -55,28 +49,29 @@ class TestSerializers(unittest.TestCase):
 
     def test_serializer_InvalidEventTypeException(self):
         self.assertRaises(InvalidEventTypeException,
-                          self.serializer.serialize,
+                          self.event_serializer.serialize,
                           EventEntity(event_type="_publication",
                                       body="Hi.", to="angela@yahoo.com"))
 
     def test_serializer_MessageBodyIsInvalidException(self):
         self.assertRaises(MessageBodyIsInvalidException,
-                          self.serializer.serialize,
+                          self.event_serializer.serialize,
                           EventEntity(event_type="new_publication",
                                       body="", to="angela@gmail.com"))
 
     def test_serializer_InvalidEmailException(self):
-        self.assertRaises(InvalidEmailException, self.serializer.serialize,
+        self.assertRaises(InvalidEmailException,
+                          self.event_serializer.serialize,
                           EventEntity(event_type="approved_publication",
                                       body="Hi.", to=None))
 
     def test_serializer_Exception(self):
-        self.assertRaises(Exception, self.serializer.serialize,
+        self.assertRaises(Exception, self.event_serializer.serialize,
                           EventEntity(event_type="approved_publication",
                                       body={"msg": "Hi."}, to="a@yahoo.com"))
 
     def test_deserialize(self):
-        self.assertEqual(self.serializer.deserialize(
+        self.assertEqual(self.event_serializer.deserialize(
             {"event_type": "new_publication",
              "body": "Hi.",
              "to": None}
@@ -86,7 +81,7 @@ class TestSerializers(unittest.TestCase):
                 body="Hi.",
                 to=None)
         )
-        self.assertEqual(self.serializer.deserialize(
+        self.assertEqual(self.event_serializer.deserialize(
             {"event_type": "approved_publication",
              "body": "Test message.",
              "to": "anzhela.iondem@gmail.com"}
@@ -96,7 +91,7 @@ class TestSerializers(unittest.TestCase):
                 body="Test message.",
                 to="anzhela.iondem@gmail.com")
         )
-        self.assertEqual(self.serializer.deserialize(
+        self.assertEqual(self.event_serializer.deserialize(
             {"event_type": "new_publication",
              "body": "Hi.",
              "to": "anzhela@gmail"}
@@ -110,22 +105,23 @@ class TestSerializers(unittest.TestCase):
 
     def test_deserializer_InvalidEventTypeException(self):
         self.assertRaises(InvalidEventTypeException,
-                          self.serializer.deserialize,
+                          self.event_serializer.deserialize,
                           {"event_type": "_publication",
                            "body": "Hi.", "to": "angela@gmail.com"})
 
     def test_deserializer_MessageBodyIsInvalidException(self):
         self.assertRaises(MessageBodyIsInvalidException,
-                          self.serializer.deserialize,
+                          self.event_serializer.deserialize,
                           {"event_type": "new_publication",
                            "body": "", "to": "anna@yahoo.com"})
 
     def test_deserializer_InvalidEmailException(self):
-        self.assertRaises(InvalidEmailException, self.serializer.deserialize,
+        self.assertRaises(InvalidEmailException,
+                          self.event_serializer.deserialize,
                           {"event_type": "approved_publication",
                            "body": "Hi.", "to": None})
 
     def test_deserializer_Exception(self):
-        self.assertRaises(Exception, self.serializer.deserialize,
+        self.assertRaises(Exception, self.event_serializer.deserialize,
                           {"event_type": "approved_publication",
                            "body": {"msg": "Hi."}, "to": "a@yahoo.com"})
